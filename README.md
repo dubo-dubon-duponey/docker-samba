@@ -41,11 +41,11 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
 ```bash
 docker run -d --rm \
         --name samba \
-        --network host_or_vlan \
         --env MDNS_ENABLED=true \
         --env USERS=dubo-dubon-duponey \
         --env PASSWORDS=replace_me \
         --read-only \
+        --net host \
         --user root \
         --cap-drop ALL \
         --cap-add DAC_OVERRIDE \
@@ -54,6 +54,9 @@ docker run -d --rm \
         --cap-add CHOWN \
         --cap-add SETUID \
         --cap-add SETGID \
+        --volume [host_path]:/media/home \
+        --volume [host_path]:/media/share \
+        --volume [host_path]:/media/timemachine \
         ghcr.io/dubo-dubon-duponey/samba
 ```
 
