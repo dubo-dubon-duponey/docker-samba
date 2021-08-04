@@ -65,4 +65,4 @@ for ((index=0; index<${#USERS[@]}; index++)); do
   helpers::createUser "${USERS[$index]}" "${PASSWORDS[$index]}"
 done
 
-exec smbd -FS -d=1 --no-process-group --configfile=/config/samba/main.conf
+exec smbd -FS -d=1 --no-process-group --configfile=/config/samba/main.conf "$@"
