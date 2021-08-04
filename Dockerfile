@@ -47,7 +47,7 @@ RUN           groupadd smb-share \
 
 RUN           mkdir -p /boot/bin; chown $BUILD_UID:root /boot/bin
 # Samba core dumps location, not configurable and cannot be disabled
-RUN           ln -s /tmp/samba/logs /var/log/samba
+RUN           rm -Rf /var/log/samba; ln -s /tmp/samba/logs /var/log/samba
 
 USER          dubo-dubon-duponey
 
