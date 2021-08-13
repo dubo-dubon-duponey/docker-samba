@@ -34,13 +34,27 @@ mkdir -p /data/samba/private
 
 # mDNS announce for both Time Machine and SMB shares
 if [ "${MDNS_ENABLED:-}" == true ]; then
-  goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "$MDNS_TYPE" -port 445 &
+  smbrecord="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": {}}' \
+    "$MDNS_TYPE" \
+    "$MDNS_NAME" \
+    "$MDNS_HOST" \
+    445)"
+  diskrecord="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": %s}' \
+    "_adisk._tcp" \
+    "$MDNS_NAME" \
+    "$MDNS_HOST" \
+    9 \
+    '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=Time Machine,adVF=0x82"}')"
+
+  goello-server -json "$(printf '[%s, %s]'  "$smbrecord" "$diskrecord")" &
+
+  #goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "$MDNS_TYPE" -port 445 &
   # XXX not completely sure what to do as port 0 is invalid
   # goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "_device-info._tcp" -port 0 -txt '{"model": "Dancing Samba"}' &
   # Port 9 is unconfirmed, and stolen from what netatalk is doing
   # Also netatalk is doing adVF=0xa1,adVU=BC7C370A-A832-BD45-1208-A8E6606A156A <- instead of adVF=0x82
-  goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "_adisk._tcp" -port 9 \
-    -txt '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=Time Machine,adVF=0x82"}'  &
+  #goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "_adisk._tcp" -port 9 \
+  #  -txt '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=Time Machine,adVF=0x82"}'  &
 fi
 
 # helper to create user accounts

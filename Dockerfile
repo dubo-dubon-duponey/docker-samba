@@ -1,7 +1,7 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-08-01@sha256:edc80b2c8fd94647f793cbcb7125c87e8db2424f16b9fd0b8e173af850932b48
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-08-01@sha256:87ec12fe94a58ccc95610ee826f79b6e57bcfd91aaeb4b716b0548ab7b2408a7
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-08-01@sha256:3fdb7b859e3fea12a7604ff4ae7e577628784ac1f6ea0d5609de65a4b26e5b3c
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-08-01@sha256:9e54b76442e4d8e1cad76acc3c982a5623b59f395b594af15bef6b489862ceac
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 #######################
@@ -45,13 +45,13 @@ RUN           groupadd smb-share \
 
 # Unclear if we need: tracker libtracker-sparql-1.0-dev (<- provides spotlight search thing)
 
-RUN           mkdir -p /boot/bin; chown $BUILD_UID:root /boot/bin
+RUN           mkdir -p /boot/bin; chown "$BUILD_UID":root /boot/bin
 # Samba core dumps location, not configurable and cannot be disabled
 RUN           rm -Rf /var/log/samba; ln -s /tmp/samba/logs /var/log/samba
 
 USER          dubo-dubon-duponey
 
-COPY          --from=builder-tools --chown=$BUILD_UID:root /boot/bin/goello-server  boot/bin
+COPY          --from=builder-tools --chown=$BUILD_UID:root /boot/bin/goello-server /boot/bin
 
 ENV           NICK=TimeMassine
 
@@ -66,7 +66,7 @@ ENV           MDNS_HOST="$NICK"
 ENV           MDNS_TYPE="_smb._tcp"
 
 # XXX disable healthchecker for now
-# COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin
+# COPY          --from=builder-healthcheck /dist/boot           /dist/boot
 # RUN           chmod 555 /dist/boot/bin/*
 
 #VOLUME        /var/log
