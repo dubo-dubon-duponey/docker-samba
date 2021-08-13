@@ -11,7 +11,7 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
    * [x] linux/arm/v6
    * [x] linux/ppc64le
    * [x] linux/386
-   * [ ] linux/s39àx
+   * [ ] linux/s390x
  * hardened:
     * [x] image runs read-only
     * [ ] image runs with the following capabilities:
@@ -24,7 +24,7 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
     * [ ] process runs as a non-root user, disabled login, no shell
         * the entrypoint script runs as root
  * lightweight
-    * [x] based on our slim [Debian bullseye version (2021-08-01)](https://github.com/dubo-dubon-duponey/docker-debian)
+    * [x] based on our slim [Debian Bullseye](https://github.com/dubo-dubon-duponey/docker-debian)
     * [x] simple entrypoint script
     * [ ] multi-stage build with ~~no installed~~ dependencies for the runtime image:
         * samba
@@ -91,6 +91,14 @@ You may evidently mount this file to further control samba configuration and beh
 ### Advanced configuration
 
 Any additional arguments when running the image will get fed to the `samba` binary.
+
+## Debugging
+
+From a mac:
+
+```
+log show --predicate 'subsystem == "com.apple.TimeMachine"' --info | grep 'upd: (' | cut -c 1-19,140-999
+```
 
 ## Moar?
 
