@@ -39,14 +39,20 @@ if [ "${MDNS_ENABLED:-}" == true ]; then
     "$MDNS_NAME" \
     "$MDNS_HOST" \
     445)"
+  device_info="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": %s}' \
+    "_device-info._tcp" \
+    "$MDNS_NAME" \
+    "$MDNS_HOST" \
+    9 \
+    '{"model": "Dubo"}')"
   diskrecord="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": %s}' \
     "_adisk._tcp" \
     "$MDNS_NAME" \
     "$MDNS_HOST" \
     9 \
-    '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=Time Machine,adVF=0x82"}')"
+    '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=timemachine,adVF=0x82"}')"
 
-  goello-server -json "$(printf '[%s, %s]'  "$smbrecord" "$diskrecord")" &
+  goello-server -json "$(printf '[%s, %s, %s]'  "$smbrecord" "$diskrecord" "$device_info")" &
 
   #goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "$MDNS_TYPE" -port 445 &
   # XXX not completely sure what to do as port 0 is invalid
@@ -79,4 +85,21 @@ for ((index=0; index<${#USERS[@]}; index++)); do
   helpers::createUser "${USERS[$index]}" "${PASSWORDS[$index]}"
 done
 
-exec smbd -FS -d=1 --no-process-group --configfile=/config/samba/main.conf "$@"
+ll=0
+case "${LOG_LEVEL:-warn}" in
+  "debug")
+    ll=3
+  ;;
+  "info")
+    ll=2
+  ;;
+  "warn")
+    ll=1
+  ;;
+  "error")
+    ll=0
+  ;;
+esac
+
+# Foreground -F, log to stdout -S, debug level -d, unclear "no process group"
+exec smbd -FS -d="$ll" --no-process-group --configfile=/config/samba/main.conf "$@"
