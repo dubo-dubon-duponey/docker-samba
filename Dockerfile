@@ -1,9 +1,10 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
 ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-10-01@sha256:5c76496f4dc901e9a59370babd9fa3c59427064971058b373121140a29fb153f
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-10-01@sha256:24da09d01cc3505dd886672c0993f6f99b4fff4d1de2fcfbbe81aa52c880b9ac
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-10-01@sha256:b08c3c560b8c05fc9305b781529805c5fd2490db953497a2236063069435672f
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
+
 #######################
 # Running image
 #######################
@@ -45,52 +46,34 @@ RUN           groupadd smb-share \
 
 # Unclear if we need: tracker libtracker-sparql-1.0-dev (<- provides spotlight search thing)
 
-RUN           mkdir -p /boot/bin; chown "$BUILD_UID":root /boot/bin
 # Samba core dumps location, not configurable and cannot be disabled
 RUN           rm -Rf /var/log/samba; ln -s /tmp/samba/logs /var/log/samba
 
 USER          dubo-dubon-duponey
 
-COPY          --from=builder-tools --chown=$BUILD_UID:root /boot/bin/goello-server /boot/bin
+COPY          --from=builder-tools --chown=$BUILD_UID:root /boot/bin/goello-server-ng /boot/bin/goello-server-ng
 
-ENV           NICK=TimeMassine
-
-### mDNS broadcasting
-# Enable/disable mDNS support
-ENV           MDNS_ENABLED=false
 # Name is used as a short description for the service
-ENV           MDNS_NAME="$NICK mDNS display name"
+ENV           MDNS_NAME="TimeSamba"
 # The service will be annonced and reachable at $MDNS_HOST.local
-ENV           MDNS_HOST="$NICK"
-# Type to advertise
-ENV           MDNS_TYPE="_smb._tcp"
+ENV           MDNS_HOST="TimeSamba"
 
-# XXX disable healthchecker for now
-# COPY          --from=builder-healthcheck /dist/boot           /dist/boot
-# RUN           chmod 555 /dist/boot/bin/*
-
-#VOLUME        /var/log
-#VOLUME        /data
-#VOLUME        /run
-#EXPOSE        548
-#EXPOSE 137/udp 138/udp 139 445
-#VOLUME ["/etc", "/var/cache/samba", "/var/lib/samba", "/var/log/samba",            "/run/samba"]
-
-EXPOSE        445
-EXPOSE        9
+ENV           MDNS_MODEL="RackMac"
 
 ENV           USERS=""
 ENV           PASSWORDS=""
 
+EXPOSE        445
+
 # Necessary for users creation
 VOLUME        /etc
+
 # Data location
 VOLUME        /media/home
 VOLUME        /media/timemachine
 VOLUME        /media/share
-# Samba permanent stuff
+
 VOLUME        /data
-# Samba transient stuff
 VOLUME        /tmp
 
 HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD smbclient -L \\localhost -U % -m SMB3 || exit 1

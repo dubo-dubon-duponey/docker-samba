@@ -29,9 +29,9 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
     * [ ] multi-stage build with ~~no installed~~ dependencies for the runtime image:
         * samba
         * samba-vfs-modules
-        * smblcient
+        * smbclient
  * observable
-    * [ ] ~~healthcheck~~
+    * [x] healthcheck
     * [x] log to stdout
     * [ ] ~~prometheus endpoint~~ not applicable
 
@@ -41,7 +41,8 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
 ```bash
 docker run -d --rm \
         --name samba \
-        --env MDNS_ENABLED=true \
+        --env MDNS_NAME=samba \
+        --env MDNS_HOST=TimeSamba \
         --env USERS=dubo-dubon-duponey \
         --env PASSWORDS=replace_me \
         --read-only \
@@ -70,8 +71,8 @@ You need to run this in `host` or `mac(or ip)vlan` networking (because of mDNS).
 
 The following extra environment variables lets you further configure the image behavior:
 
-* MDNS_ENABLED lets you control whether Samba will announce itself over mDNS
 * MDNS_HOST controls the host part under which the service is being announced (eg: $MDNS_HOST.local)
+  * If set empty, will disable mDNS announcements altogether
 * MDNS_NAME controls the fancy name
 * USERS is a space separated list of users
 * PASSWORDS is a space separated list of passwords
@@ -92,7 +93,7 @@ You may evidently mount this file to further control samba configuration and beh
 
 Any additional arguments when running the image will get fed to the `samba` binary.
 
-## Debugging
+## Debugging TimeMachine
 
 From a mac:
 

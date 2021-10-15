@@ -1,67 +1,42 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
+root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
+readonly root
+# shellcheck source=/dev/null
+source "$root/mdns.sh"
+# shellcheck source=/dev/null
+source "$root/helpers.sh"
+
+# Necessary for user accounts creation
+helpers::dir::writable /etc
+
+# Data locations
+helpers::dir::writable /media/home
+helpers::dir::writable /media/share
+helpers::dir::writable /media/timemachine
+
+# Typically gets samba logs, lock, pid, etc
+helpers::dir::writable /tmp/samba/lock create
+helpers::dir::writable /tmp/samba/pid create
+helpers::dir::writable /tmp/samba/cache create
+helpers::dir::writable /tmp/samba/rpc create
+helpers::dir::writable /tmp/samba/logs create
+# Normal data location - get samba private and state info
+helpers::dir::writable /data/samba/state create
+helpers::dir::writable /data/samba/private create
+
+# https://jonathanmumm.com/tech-it/mdns-bonjour-bible-common-service-strings-for-various-vendors/
 # https://piware.de/2012/10/running-a-samba-server-as-normal-user-for-testing/
+# Model controls the icon in the finder: RackMac - https://simonwheatley.co.uk/2008/04/avahi-finder-icons/
 
-# XXX temporary, as this should be ported into our base debian image
-export GNUTLS_FORCE_FIPS_MODE=1
-
-[ -w /tmp ] || {
-  printf >&2 "/tmp is not writable. Check your mount permissions.\n"
-  exit 1
+[ ! "$MDNS_HOST" ] || {
+  mdns::add "_smb._tcp"         "$MDNS_HOST" "${MDNS_NAME:-}" 445
+  mdns::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" 445
+  mdns::add "_device-info._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" 445 '["model='"${MDNS_MODEL:-RackMac}"'"]'
+  mdns::add "_adisk._tcp"       "$MDNS_HOST" "${MDNS_NAME:-}" 445 '["sys=waMa=0,adVF=0x100", "dk0=adVN=timemachine,adVF=0x82"]'
+  mdns::start &
 }
-
-[ -w /data ] || {
-  printf >&2 "/data is not writable. Check your mount permissions.\n"
-  exit 1
-}
-
-mkdir -p /tmp/samba/lock
-mkdir -p /tmp/samba/pid
-mkdir -p /tmp/samba/cache
-mkdir -p /tmp/samba/rpc
-mkdir -p /tmp/samba/logs
-mkdir -p /data/samba/state
-mkdir -p /data/samba/private
-
-# Test if this gets into the config
-# Purely tentative
-# Does not seem to work
-# SMB_WORKGROUP=loliworkgroup
-
-# enable core files = no
-# /var/log/samba/cores
-
-# mDNS announce for both Time Machine and SMB shares
-if [ "${MDNS_ENABLED:-}" == true ]; then
-  smbrecord="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": {}}' \
-    "$MDNS_TYPE" \
-    "$MDNS_NAME" \
-    "$MDNS_HOST" \
-    445)"
-  device_info="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": %s}' \
-    "_device-info._tcp" \
-    "$MDNS_NAME" \
-    "$MDNS_HOST" \
-    9 \
-    '{"model": "Dubo"}')"
-  diskrecord="$(printf '{"Type": "%s", "Name": "%s", "Host": "%s", "Port": %s, "Text": %s}' \
-    "_adisk._tcp" \
-    "$MDNS_NAME" \
-    "$MDNS_HOST" \
-    9 \
-    '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=timemachine,adVF=0x82"}')"
-
-  goello-server -json "$(printf '[%s, %s, %s]'  "$smbrecord" "$diskrecord" "$device_info")" &
-
-  #goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "$MDNS_TYPE" -port 445 &
-  # XXX not completely sure what to do as port 0 is invalid
-  # goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "_device-info._tcp" -port 0 -txt '{"model": "Dancing Samba"}' &
-  # Port 9 is unconfirmed, and stolen from what netatalk is doing
-  # Also netatalk is doing adVF=0xa1,adVU=BC7C370A-A832-BD45-1208-A8E6606A156A <- instead of adVF=0x82
-  #goello-server -name "$MDNS_NAME" -host "$MDNS_HOST" -type "_adisk._tcp" -port 9 \
-  #  -txt '{"sys": "waMa=0,adVF=0x100", "dk0": "adVN=Time Machine,adVF=0x82"}'  &
-fi
 
 # helper to create user accounts
 helpers::createUser(){
@@ -70,6 +45,10 @@ helpers::createUser(){
   adduser --home "/media/home/$login" --disabled-password --ingroup smb-share --gecos '' "$login" || {
     printf "%s\n" "WARN: failed creating user. Possibly it already exists."
   }
+
+  # Ensure the user timemachine folder is there, owned by them
+  helpers::dir::writable "/media/timemachine/$login" create
+  chown "$login:smb-share" "/media/timemachine/$login"
 
   printf "%s:%s" "$login" "$password" | chpasswd
   printf "%s\n%s\n" "$password" "$password" | smbpasswd -c /config/samba/main.conf -a "$login"
@@ -85,6 +64,7 @@ for ((index=0; index<${#USERS[@]}; index++)); do
   helpers::createUser "${USERS[$index]}" "${PASSWORDS[$index]}"
 done
 
+# Convert log level to samba lingo
 ll=0
 case "${LOG_LEVEL:-warn}" in
   "debug")
