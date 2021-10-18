@@ -4,9 +4,9 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 readonly root
 # shellcheck source=/dev/null
-source "$root/mdns.sh"
-# shellcheck source=/dev/null
 source "$root/helpers.sh"
+# shellcheck source=/dev/null
+source "$root/mdns.sh"
 
 # Necessary for user accounts creation
 helpers::dir::writable /etc
