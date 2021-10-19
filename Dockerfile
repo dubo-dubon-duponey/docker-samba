@@ -53,10 +53,18 @@ USER          dubo-dubon-duponey
 
 COPY          --from=builder-tools --chown=$BUILD_UID:root /boot/bin/goello-server-ng /boot/bin/goello-server-ng
 
+ENV           _SERVICE_NICK="TimeSamba"
+ENV           _SERVICE_TYPE="smb"
+
+### mDNS broadcasting
+# Type to advertise
+ENV           MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
-ENV           MDNS_NAME="TimeSamba"
+ENV           MDNS_NAME="$_SERVICE_NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-ENV           MDNS_HOST="TimeSamba"
+ENV           MDNS_HOST="$_SERVICE_NICK"
+# Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
+ENV           MDNS_STATION=true
 
 ENV           MDNS_MODEL="RackMac"
 
