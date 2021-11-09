@@ -30,7 +30,7 @@ helpers::dir::writable /data/samba/private create
 # https://piware.de/2012/10/running-a-samba-server-as-normal-user-for-testing/
 # Model controls the icon in the finder: RackMac - https://simonwheatley.co.uk/2008/04/avahi-finder-icons/
 
-[ ! "${MDNS_HOST:-}" ] || {
+[ "${MDNS_ENABLED:-}" != true ] || {
   [ ! "${MDNS_STATION:-}" ] || mdns::records::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" 445
   mdns::records::add "${MDNS_TYPE:-_smb._tcp}" "$MDNS_HOST" "${MDNS_NAME:-}" 445
   mdns::records::add "_device-info._tcp"       "$MDNS_HOST" "${MDNS_NAME:-}" 445 '["model='"${MDNS_MODEL:-RackMac}"'"]'
