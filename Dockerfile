@@ -1,7 +1,7 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-11-01@sha256:c29f582f211999ba573b8010cdf623e695cc0570d2de6c980434269357a3f8ef
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-11-01@sha256:8ee6c2243bacfb2ec1a0010a9b1bf41209330ae940c6f88fee9c9e99f9cb705d
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-04-01@sha256:6456b76dd2eedf34b4c5c997f9ad92901220dfdd405ec63419d0b54b6d85a777
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-04-01@sha256:323f3e36da17d8638a07a656e2f17d5ee4dc2b17dfea7e2da36e1b2174cc5f18
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -23,9 +23,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                samba=2:4.13.5+dfsg-2 \
-                samba-vfs-modules=2:4.13.5+dfsg-2 \
-                smbclient=2:4.13.5+dfsg-2 \
+                samba=2:4.13.13+dfsg-1~deb11u3 \
+                samba-vfs-modules=2:4.13.13+dfsg-1~deb11u3 \
+                smbclient=2:4.13.13+dfsg-1~deb11u3 \
                 && \
               apt-get -qq autoremove      && \
               apt-get -qq clean           && \
