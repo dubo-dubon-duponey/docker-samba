@@ -1,7 +1,7 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
+ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-05-01@sha256:5e44963d961cf7594cf8a0d1bba98fd5da69d7881cb77c142a43ceab230e87df
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-05-01@sha256:6268013e3bd16eaaf7dd15c7689f8740bd00af1149c92795cc42fab4f3c6d07a
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-08-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-08-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
