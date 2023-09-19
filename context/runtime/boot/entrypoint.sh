@@ -30,13 +30,16 @@ helpers::dir::writable /data/samba/private create
 # https://piware.de/2012/10/running-a-samba-server-as-normal-user-for-testing/
 # Model controls the icon in the finder: RackMac - https://simonwheatley.co.uk/2008/04/avahi-finder-icons/
 
-[ "${MDNS_ENABLED:-}" != true ] || {
-  [ ! "${MDNS_STATION:-}" ] || mdns::records::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" 445
-  mdns::records::add "${MDNS_TYPE:-_smb._tcp}" "$MDNS_HOST" "${MDNS_NAME:-}" 445
-  mdns::records::add "_device-info._tcp"       "$MDNS_HOST" "${MDNS_NAME:-}" 445 '["model='"${MDNS_MODEL:-RackMac}"'"]'
-  mdns::records::add "_adisk._tcp"             "$MDNS_HOST" "${MDNS_NAME:-}" 445 '["sys=waMa=0,adVF=0x100", "dk0=adVN=timemachine,adVF=0x82"]'
-  mdns::records::broadcast &
+# mDNS
+[ "${MOD_MDNS_ENABLED:-}" != true ] || {
+  [ "${ADVANCED_MOD_MDNS_STATION:-}" != true ] || mdns::records::add "_workstation._tcp" "${MOD_MDNS_HOST}" "${MOD_MDNS_NAME:-}" 445
+  mdns::records::add "${ADVANCED_MOD_MDNS_TYPE:-_smb._tcp}" "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445
+  mdns::records::add "_device-info._tcp"       "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445 '["model='"${MODEL:-RackMac}"'"]'
+  mdns::records::add "_adisk._tcp"             "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445 '["sys=waMa=0,adVF=0x100", "dk0=adVN=timemachine,adVF=0x82"]'
+  mdns::start::broadcaster &
 }
+
+
 
 # helper to create user accounts
 helpers::createUser(){
@@ -82,4 +85,4 @@ case "${LOG_LEVEL:-warn}" in
 esac
 
 # Foreground -F, log to stdout -S, debug level -d, unclear "no process group"
-exec smbd -FS -d="$ll" --no-process-group --configfile=/config/samba/main.conf "$@"
+exec smbd -F --debug-stdout -d="$ll" --no-process-group --configfile=/config/samba/main.conf "$@"
