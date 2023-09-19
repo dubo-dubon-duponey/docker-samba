@@ -58,7 +58,7 @@ docker run -d --rm \
         --volume [host_path]:/media/home \
         --volume [host_path]:/media/share \
         --volume [host_path]:/media/timemachine \
-        index.docker.io/dubodubonduponey/samba
+        docker.io/dubodubonduponey/samba
 ```
 
 ## Notes

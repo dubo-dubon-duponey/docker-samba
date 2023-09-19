@@ -1,7 +1,7 @@
-ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-08-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-08-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2023-09-05
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2023-09-05
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -22,11 +22,10 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
-              apt-get install -qq --no-install-recommends \
-                samba=2:4.13.13+dfsg-1~deb11u3 \
-                samba-vfs-modules=2:4.13.13+dfsg-1~deb11u3 \
-                smbclient=2:4.13.13+dfsg-1~deb11u3 \
-                && \
+              apt-get install -y --no-install-recommends \
+                samba=2:4.17.10+dfsg-0+deb12u1 \
+                samba-vfs-modules=2:4.17.10+dfsg-0+deb12u1 \
+                smbclient=2:4.17.10+dfsg-0+deb12u1 && \
               apt-get -qq autoremove      && \
               apt-get -qq clean           && \
               rm -rf /var/lib/apt/lists/* && \
@@ -58,18 +57,17 @@ ENV           _SERVICE_TYPE="smb"
 
 ### mDNS broadcasting
 # Whether to enable MDNS broadcasting or not
-ENV           MDNS_ENABLED=true
+ENV           MOD_MDNS_ENABLED=true
 # Type to advertise
-ENV           MDNS_TYPE="_$_SERVICE_TYPE._tcp"
+ENV           MOD_MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
-ENV           MDNS_NAME="$_SERVICE_NICK mDNS display name"
+ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-ENV           MDNS_HOST="$_SERVICE_NICK"
+ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           MDNS_STATION=true
+ENV           ADVANCED_MOD_MDNS_STATION=true
 
-ENV           MDNS_MODEL="RackMac"
-
+ENV           MODEL="RackMac"
 ENV           USERS=""
 ENV           PASSWORDS=""
 
