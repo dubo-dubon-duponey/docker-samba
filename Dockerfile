@@ -1,7 +1,7 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2023-09-05
-ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2023-09-05
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2024-02-20
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2024-02-20
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -23,9 +23,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
               apt-get install -y --no-install-recommends \
-                samba=2:4.17.10+dfsg-0+deb12u1 \
-                samba-vfs-modules=2:4.17.10+dfsg-0+deb12u1 \
-                smbclient=2:4.17.10+dfsg-0+deb12u1 && \
+                samba=2:4.17.12+dfsg-0+deb12u1 \
+                samba-vfs-modules=2:4.17.12+dfsg-0+deb12u1 \
+                smbclient=2:4.17.12+dfsg-0+deb12u1 && \
               apt-get -qq autoremove      && \
               apt-get -qq clean           && \
               rm -rf /var/lib/apt/lists/* && \
