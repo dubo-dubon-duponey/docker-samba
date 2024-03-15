@@ -22,7 +22,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
-              apt-get install -y --no-install-recommends \
+              apt-get install -qq --no-install-recommends \
                 samba=2:4.17.12+dfsg-0+deb12u1 \
                 samba-vfs-modules=2:4.17.12+dfsg-0+deb12u1 \
                 smbclient=2:4.17.12+dfsg-0+deb12u1 && \
@@ -62,7 +62,7 @@ ENV           MOD_MDNS_ENABLED=true
 ENV           MOD_MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
 ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
-# The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
+# The service will be annonced and reachable at $MOD_MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
 ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
 ENV           ADVANCED_MOD_MDNS_STATION=true
@@ -73,7 +73,7 @@ ENV           PASSWORDS=""
 
 EXPOSE        445
 
-# Necessary for users creation
+# Necessary for users creation - XXX this is problematic as it will keep back /etc/apt for eg
 VOLUME        /etc
 
 # Data location

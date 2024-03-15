@@ -14,7 +14,7 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
    * [ ] linux/s390x
  * hardened:
     * [x] image runs read-only
-    * [ ] image runs with the following capabilities:
+    * [ ] image runs with ~~no capabilities~~ the following capabilities:
         * NET_BIND_SERVICE
         * CHOWN
         * FOWNER
@@ -24,12 +24,9 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
     * [ ] process runs as a non-root user, disabled login, no shell
         * the entrypoint script runs as root
  * lightweight
-    * [x] based on our slim [Debian Bullseye](https://github.com/dubo-dubon-duponey/docker-debian)
+    * [x] based on our slim [Debian Bookworm](https://github.com/dubo-dubon-duponey/docker-debian)
     * [x] simple entrypoint script
-    * [ ] multi-stage build with ~~no installed~~ dependencies for the runtime image:
-        * samba
-        * samba-vfs-modules
-        * smbclient
+    * [ ] multi-stage build with ~~zero packages~~ `samba`, `samba-vfs-modules`, `smbclient` installed in the runtime image
  * observable
     * [x] healthcheck
     * [x] log to stdout
@@ -41,8 +38,8 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
 ```bash
 docker run -d --rm \
         --name samba \
-        --env MDNS_NAME=samba \
-        --env MDNS_HOST=TimeSamba \
+        --env MOD_MDNS_NAME=samba \
+        --env MOD_MDNS_HOST=TimeSamba \
         --env USERS=dubo-dubon-duponey \
         --env PASSWORDS=replace_me \
         --read-only \
@@ -71,9 +68,9 @@ You need to run this in `host` or `mac(or ip)vlan` networking (because of mDNS).
 
 The following extra environment variables lets you further configure the image behavior:
 
-* MDNS_HOST controls the host part under which the service is being announced (eg: $MDNS_HOST.local)
+* MOD_MDNS_HOST controls the host part under which the service is being announced (eg: $MOD_MDNS_HOST.local)
   * If set empty, will disable mDNS announcements altogether
-* MDNS_NAME controls the fancy name
+* MOD_MDNS_NAME controls the fancy name
 * USERS is a space separated list of users
 * PASSWORDS is a space separated list of passwords
 

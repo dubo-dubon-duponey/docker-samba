@@ -4,9 +4,9 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 readonly root
 # shellcheck source=/dev/null
-source "$root/helpers.sh"
+. "$root/helpers.sh"
 # shellcheck source=/dev/null
-source "$root/mdns.sh"
+. "$root/mdns.sh"
 
 # Necessary for user accounts creation
 helpers::dir::writable /etc
@@ -36,10 +36,8 @@ helpers::dir::writable /data/samba/private create
   mdns::records::add "${ADVANCED_MOD_MDNS_TYPE:-_smb._tcp}" "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445
   mdns::records::add "_device-info._tcp"       "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445 '["model='"${MODEL:-RackMac}"'"]'
   mdns::records::add "_adisk._tcp"             "${MOD_MDNS_HOST:-}" "${MOD_MDNS_NAME:-}" 445 '["sys=waMa=0,adVF=0x100", "dk0=adVN=timemachine,adVF=0x82"]'
-  mdns::start::broadcaster &
+  mdns::start::broadcaster
 }
-
-
 
 # helper to create user accounts
 helpers::createUser(){
