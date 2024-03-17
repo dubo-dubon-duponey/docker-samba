@@ -7,11 +7,6 @@ A docker image for [Samba](https://www.samba.org/) geared towards TimeMachine ba
  * multi-architecture:
    * [x] linux/amd64
    * [x] linux/arm64
-   * [x] linux/arm/v7
-   * [x] linux/arm/v6
-   * [x] linux/ppc64le
-   * [x] linux/386
-   * [ ] linux/s390x
  * hardened:
     * [x] image runs read-only
     * [ ] image runs with ~~no capabilities~~ the following capabilities:
