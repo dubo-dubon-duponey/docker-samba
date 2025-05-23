@@ -8,23 +8,28 @@ readonly root
 # shellcheck source=/dev/null
 . "$root/mdns.sh"
 
-# Necessary for user accounts creation
+# Necessary for user accounts creation - and a royal PITA
 helpers::dir::writable /etc
 
 # Data locations
-helpers::dir::writable /media/home
-helpers::dir::writable /media/share
-helpers::dir::writable /media/timemachine
+helpers::dir::writable "$XDG_DATA_HOME"/samba/home
+helpers::dir::writable "$XDG_DATA_HOME"/samba/share
+helpers::dir::writable "$XDG_DATA_HOME"/samba/timemachine
 
 # Typically gets samba logs, lock, pid, etc
-helpers::dir::writable /tmp/samba/lock create
-helpers::dir::writable /tmp/samba/pid create
-helpers::dir::writable /tmp/samba/cache create
-helpers::dir::writable /tmp/samba/rpc create
-helpers::dir::writable /tmp/samba/logs create
+helpers::dir::writable "$XDG_RUNTIME_DIR"/samba/lock create
+helpers::dir::writable "$XDG_RUNTIME_DIR"/samba/pid create
+helpers::dir::writable "$XDG_RUNTIME_DIR"/samba/rpc create
+helpers::dir::writable "$XDG_CACHE_HOME"/samba/cache create
+# helpers::dir::writable "$XDG_STATE_HOME"/samba/logs create
 # Normal data location - get samba private and state info
-helpers::dir::writable /data/samba/state create
-helpers::dir::writable /data/samba/private create
+helpers::dir::writable "$XDG_STATE_HOME"/samba/state create
+
+helpers::dir::writable "$XDG_CONFIG_HOME"/samba create
+
+helpers::dir::writable "$XDG_DATA_HOME"/samba create
+helpers::dir::writable "$XDG_DATA_HOME"/samba/private create
+
 
 # https://jonathanmumm.com/tech-it/mdns-bonjour-bible-common-service-strings-for-various-vendors/
 # https://piware.de/2012/10/running-a-samba-server-as-normal-user-for-testing/
@@ -52,7 +57,7 @@ helpers::createUser(){
   chown "$login:smb-share" "/media/timemachine/$login"
 
   printf "%s:%s" "$login" "$password" | chpasswd
-  printf "%s\n%s\n" "$password" "$password" | smbpasswd -c /config/samba/main.conf -a "$login"
+  printf "%s\n%s\n" "$password" "$password" | smbpasswd -c "$XDG_CONFIG_DIRS"/samba/main.conf -a "$login"
 }
 
 # shellcheck disable=SC2206
@@ -83,4 +88,4 @@ case "${LOG_LEVEL:-warn}" in
 esac
 
 # Foreground -F, log to stdout -S, debug level -d, unclear "no process group"
-exec smbd -F --debug-stdout -d="$ll" --no-process-group --configfile=/config/samba/main.conf "$@"
+exec smbd -F --debug-stdout -d="$ll" --no-process-group --configfile="$XDG_CONFIG_DIRS"/samba/main.conf "$@"

@@ -1,7 +1,7 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2024-03-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2024-03-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2025-05-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2025-05-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -76,12 +76,10 @@ EXPOSE        445
 # Necessary for users creation - XXX this is problematic as it will keep back /etc/apt for eg
 VOLUME        /etc
 
-# Data location
-VOLUME        /media/home
-VOLUME        /media/timemachine
-VOLUME        /media/share
-
-VOLUME        /data
-VOLUME        /tmp
+VOLUME        "$XDG_DATA_HOME"
+VOLUME        "$XDG_CONFIG_HOME"
+VOLUME        "$XDG_STATE_HOME"
+VOLUME        "$XDG_CACHE_HOME"
+VOLUME        "$XDG_RUNTIME_DIR"
 
 HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD smbclient -L \\localhost -U % -m SMB3 || exit 1

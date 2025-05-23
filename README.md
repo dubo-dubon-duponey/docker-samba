@@ -71,13 +71,14 @@ The following extra environment variables lets you further configure the image b
 
 The image runs read-only, but the following volumes are mounted rw:
 * /etc this is necessary to allow for on-the-fly user creation
-* /media/home where users homes are located
-* /media/share where the common share is located
-* /media/timemachine where the timemachine backups are located
-* /data where Samba will keep its system data
-* /tmp where Samba will keep its transient data
+* /magnetar/user/data/home where users homes are located
+* /magnetar/user/data/share where the common share is located
+* /magnetar/user/data/timemachine where the timemachine backups are located
+* /magnetar/cache
+* /magnetar/state
+* /magnetar/runtime
 
-Samba is started with -c /config/samba/main.conf
+Samba is started with -c /magnetar/system/config/samba/main.conf
 
 You may evidently mount this file to further control samba configuration and behavior.
 
